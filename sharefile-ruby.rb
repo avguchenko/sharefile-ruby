@@ -10,7 +10,10 @@ module Net #use local certs to make SSL work
     alias_method :original_use_ssl=, :use_ssl=
    
     def use_ssl=(flag)
-      self.ca_file = 'ca-bundle.crt' 
+      open('ca-bundle.crt', 'w') do |file|
+        file << open("http://certifie.com/ca-bundle/ca-bundle.crt.txt").read
+      end
+      self.ca_file = 'ca-bundle.crt'
       self.verify_mode = OpenSSL::SSL::VERIFY_PEER
       self.original_use_ssl = flag
     end
@@ -50,15 +53,14 @@ class ShareFolder
                 :ispersonal
 
  
-  REQUEST_PREFIX = "https://subdomain.sharefile.com/rest/folder.aspx?op="
+  REQUEST_PREFIX = "https://subdomain.sharefile.com/rest/folder.aspx?fmt=json&op="
 
-  def initialize(id, authid, item=nil)
+  def initialize(id, authid, item=nil, include_children=false)
     @id = id
     @authid = authid
     @children = []
 
-    if item
-      #create from item
+    if item #create from item to avoid an extra API call
       @parentid        = item["parentid"]
       @parentname      = item["parentname"]
       @grandparentid   = item["grandparentid"]
@@ -114,40 +116,42 @@ class ShareFolder
       @ispinned        = info["ispinned"]
       @ispersonal      = info["ispersonal"]
     end
+    
+    fetch_children if include_children
   end
 
   def get
-    url = REQUEST_PREFIX+"get&authid=#{@authid}&id=#{@id}&fmt=json"
+    url = REQUEST_PREFIX+"get&authid=#{@authid}&id=#{@id}"
     return JSON.parse(open(url).read)["value"]
   end       
 
   def getex
-    url = REQUEST_PREFIX+"getex&authid=#{@authid}&id=#{@id}&fmt=json"
+    url = REQUEST_PREFIX+"getex&authid=#{@authid}&id=#{@id}"
     return JSON.parse(open(url).read)["value"]
   end
 
   def create(name)
-    url = REQUEST_PREFIX+"create&authid=#{@authid}&id=#{@id}&name=#{name}&fmt=json"
+    url = REQUEST_PREFIX+"create&authid=#{@authid}&id=#{@id}&name=#{name}"
     return JSON.parse(open(url).read)["value"]
   end
 
   def list
-    url = REQUEST_PREFIX+"list&authid=#{@authid}&id=#{@id}&fmt=json"
+    url = REQUEST_PREFIX+"list&authid=#{@authid}&id=#{@id}"
     return JSON.parse(open(url).read)["value"]
   end
 
   def listex
-    url = REQUEST_PREFIX+"listex&authid=#{@authid}&id=#{@id}&fmt=json"
+    url = REQUEST_PREFIX+"listex&authid=#{@authid}&id=#{@id}"
     return JSON.parse(open(url).read)["value"]
   end
 
-  def populate_children
+  def fetch_children
     @children = []
     for item in self.listex
-      if item["type"] == "folder" and item["id"]!=@id
-        @children << ShareFolder.new(item["id"], @authid)
+      if item["type"] == "folder" and item["id"]!=@id #sharefile API includes self in list
+        @children << ShareFolder.new(item["id"], @authid, item)
       elsif item["type"] == "file"
-        @children << ShareFile.new(item["id"], @authid)
+        @children << ShareFile.new(item["id"], @authid, item)
       end
     end
   end
@@ -155,12 +159,85 @@ end #ShareFolder
  
 class ShareFile
  
-  attr_accessor :id
+  attr_accessor :id, :authid,
+                :parentid,
+                :parentname,
+                :grandparentid,
+                :type, 
+                :displayname,
+                :size,   
+                :creatorname,
+                :zoneid,   
+                :canupload,
+                :candownload,
+                :candelete,
+                :creationdate,
+                :filename,
+                :details,
+                :creatorid,
+                :creatorfname,
+                :creatorlname,
+                :description,
+                :expirationdate,
+                :filecount,
+                :progenyeditdate,
+                :streamid,
+                :commentcount,
+                :isfavorite,
+                :ispinned,
+                :ispersonal
 
-  def initialize(id, authid)
+  REQUEST_PREFIX = "https://subdomain.sharefile.com/rest/file.aspx?fmt=json&op="
+
+  def initialize(id, authid, item=nil)
     @id = id
+    if item #create from item to avoid an extra API call
 
+    else #create from getex
+      info = self.getex
+      @parentid        = info["parentid"]
+      @parentname      = info["parentname"]
+      @grandparentid   = info["grandparentid"]
+      @type            = info["type"]
+      @displayname     = info["displayname"]
+      @size            = info["size"]
+      @creatorname     = info["creatorname"]
+      @zoneid          = info["zoneid"]
+      @canupload       = info["canupload"]
+      @candownload     = info["candownload"]
+      @candelete       = info["candelete"]
+      @creationdate    = info["creationdate"]
+      @filename        = info["filename"]
+      @details         = info["details"]
+      @creatorid       = info["creatorid"]
+      @creatorfname    = info["creatorfname"]
+      @creatorlname    = info["creatorlname"]
+      @description     = info["description"]
+      @expirationdate  = info["expirationdate"]
+      @filecount       = info["filecount"]
+      @progenyeditdate = info["progenyeditdate"]
+      @streamid        = info["streamid"]
+      @commentcount    = info["commentcount"]
+      @isfavorite      = info["isfavorite"]
+      @ispinned        = info["ispinned"]
+      @ispersonal      = info["ispersonal"]
+    end
   end
+
+  def getex
+    url = REQUEST_PREFIX+"getex&authid=#{@authid}&id=#{@id}"
+    return JSON.parse(open(url).read)["value"]
+  end
+
+  def parent
+    return ShareFolder.new(@parentid, @authid)
+  end
+
+  def grandparent
+    return ShareFolder.new(@grandparentid, @authid)
+  end
+
+
 end #ShareFile
  
 class ShareFileService
@@ -178,15 +255,21 @@ class ShareFileService
     @root_folder = ShareFolder.new(@root_id, @authid)
   end
 
-  #https://subdomain.sharefile.com/rest/method.aspx?[parameter collection]
-
   def search(q)
-    url = "https://#{subdomain}.sharefile.com/rest/search.aspx?op=search&query=#{q}&authid=#{@authid}&fmt=json"
-    result = JSON.parse(open(url).read)
-    if result["value"] #success
-      return result["value"]
+    results = []
+    url = "https://#{@subdomain}.sharefile.com/rest/search.aspx?op=search&query=#{q}&authid=#{@authid}&fmt=json"
+    response = JSON.parse(open(url).read)
+    if response["value"] #success
+      response["value"].each do |item|
+        if item["type"] == "folder"
+          results << ShareFolder.new(item["id"], @authid, item)
+        elsif item["type"] == "file"
+          results << ShareFile.new(item["id"], @authid, item)
+        end
+      end
+      return results
     else #error
-      return result
+      return response
     end
   end
  
