@@ -285,7 +285,7 @@
           
           <div class="method-source-code" id="search-source">
             <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 258</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">search</span>(<span class="ruby-identifier">q</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">search</span>(<span class="ruby-identifier">q</span>) <span class="ruby-comment">#returns a list of ShareFolder and ShareFile objects</span>
   <span class="ruby-identifier">results</span> = []
   <span class="ruby-identifier">url</span> = <span class="ruby-node">&quot;https://#{@subdomain}.sharefile.com/rest/search.aspx?op=search&amp;query=#{q}&amp;authid=#{@authid}&amp;fmt=json&quot;</span>
   <span class="ruby-identifier">response</span> = <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">open</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">read</span>)

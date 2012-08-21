@@ -255,7 +255,7 @@ class ShareFileService
     @root_folder = ShareFolder.new(@root_id, @authid)
   end
 
-  def search(q)
+  def search(q) #returns a list of ShareFolder and ShareFile objects
     results = []
     url = "https://#{@subdomain}.sharefile.com/rest/search.aspx?op=search&query=#{q}&authid=#{@authid}&fmt=json"
     response = JSON.parse(open(url).read)
