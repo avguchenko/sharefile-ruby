@@ -22,8 +22,7 @@ end
  
 class ShareFolder
  
-  attr_accessor :id,
-                :authid,
+  attr_accessor :id, :authid, :subdomain,
                 :children,
                 :parentid,
                 :parentname,
@@ -53,14 +52,13 @@ class ShareFolder
                 :ispersonal
 
  
-  REQUEST_PREFIX = "https://subdomain.sharefile.com/rest/folder.aspx?fmt=json&op="
-
-  def initialize(id, authid, item=nil, include_children=false)
+  def initialize(id, authid, subdomain, item=nil, include_children=false)
     @id = id
     @authid = authid
+    @subdomain = subdomain
     @children = []
 
-    if item #create from item to avoid an extra API call
+    if item #get attributes from item to avoid an extra API call
       @parentid        = item["parentid"]
       @parentname      = item["parentname"]
       @grandparentid   = item["grandparentid"]
@@ -87,7 +85,7 @@ class ShareFolder
       @isfavorite      = item["isfavorite"]
       @ispinned        = item["ispinned"]
       @ispersonal      = item["ispersonal"]
-    else #create from getex
+    else #get attributes from getex
       info = self.getex
       @parentid        = info["parentid"]
       @parentname      = info["parentname"]
@@ -120,29 +118,66 @@ class ShareFolder
     fetch_children if include_children
   end
 
+  def prefix
+    "https://#{@subdomain}.sharefile.com/rest/folder.aspx?fmt=json&authid=#{@authid}&id=#{@id}&op="
+  end
+
+  def response(url)
+    r = JSON.parse(open(url).read)
+    if r["error"] == false
+      return r["value"]
+    else
+      return r
+    end
+  end
+
   def get
-    url = REQUEST_PREFIX+"get&authid=#{@authid}&id=#{@id}"
-    return JSON.parse(open(url).read)["value"]
+    url = prefix + "get"
+    return response(url)
   end       
 
   def getex
-    url = REQUEST_PREFIX+"getex&authid=#{@authid}&id=#{@id}"
-    return JSON.parse(open(url).read)["value"]
+    url = prefix + "getex"
+    return response(url)
   end
 
   def create(name)
-    url = REQUEST_PREFIX+"create&authid=#{@authid}&id=#{@id}&name=#{name}"
-    return JSON.parse(open(url).read)["value"]
+    url = prefix + "create" + "&name=#{name}"
+    return response(url)
   end
 
   def list
-    url = REQUEST_PREFIX+"list&authid=#{@authid}&id=#{@id}"
-    return JSON.parse(open(url).read)["value"]
+    url = prefix + "list"
+    return response(url)
+  end
+
+  def delete
+    url = prefix + "delete"
+    return response(url)
+  end
+
+  def rename(name)
+    url = prefix + "rename&name=#{name}" 
+    return response(url)
+  end
+
+  def request_url(requirelogin=false, requireuserinfo=false, expirationdays=30, notifyonupload=false)
+  end
+
+  def grant(userid=nil, email=nil, download=true, upload=false, view=true, admin=false, delete=false, notifyupload=false, notifydownload=false) #(userid OR email) required
+  end
+  
+  def revoke(userid=nil, email=nil) #(userid OR email) required
   end
 
   def listex
-    url = REQUEST_PREFIX+"listex&authid=#{@authid}&id=#{@id}"
-    return JSON.parse(open(url).read)["value"]
+    url = prefix + "listex"
+    return response(url)
+  end
+
+  def getacl
+    url = prefix + "getacl"
+    return response(url)
   end
 
   def fetch_children
@@ -159,87 +194,218 @@ end #ShareFolder
  
 class ShareFile
  
-  attr_accessor :id, :authid,
-                :parentid,
-                :parentname,
-                :grandparentid,
-                :type, 
-                :displayname,
-                :size,   
-                :creatorname,
-                :zoneid,   
-                :canupload,
-                :candownload,
-                :candelete,
-                :creationdate,
+  attr_accessor :id, :authid, :subdomain,
+                :type,
                 :filename,
-                :details,
-                :creatorid,
+                :displayname,
+                :size,
+                :creationdate,
                 :creatorfname,
                 :creatorlname,
                 :description,
+                :descriptionhtml,
                 :expirationdate,
-                :filecount,
-                :progenyeditdate,
+                :parentid,
+                :parentname,
+                :url,
+                :previewstatus,
+                :virusstatus,
+                :md5,
+                :thumb75,
+                :thumb600,
+                :creatorid,
                 :streamid,
-                :commentcount,
-                :isfavorite,
-                :ispinned,
-                :ispersonal
+                :zoneid
 
-  REQUEST_PREFIX = "https://subdomain.sharefile.com/rest/file.aspx?fmt=json&op="
-
-  def initialize(id, authid, item=nil)
+  def initialize(id, authid, subdomain, item=nil)
     @id = id
-    if item #create from item to avoid an extra API call
+    @authid = authid
+    @subdomain = subdomain
 
-    else #create from getex
+    if item #get attributes from item to avoid an extra API call
+      @type             = item["type"]
+      @filename         = item["filename"]
+      @displayname      = item["displayname"]
+      @size             = item["size"]
+      @creationdate     = item["creationdate"]
+      @creatorfname     = item["creatorfname"]
+      @creatorlname     = item["creatorlname"]
+      @description      = item["description"]
+      @descriptionhtml  = item["descriptionhtml"]
+      @expirationdate   = item["expirationdate"]
+      @parentid         = item["parentid"]
+      @parentname       = item["parentname"]
+      @url              = item["url"]
+      @previewstatus    = item["previewstatus"]
+      @virusstatus      = item["virusstatus"]
+      @md5              = item["md5"]
+      @thumb75          = item["thumb75"]
+      @thumb600         = item["thumb600"]
+      @creatorid        = item["creatorid"]
+      @streamid         = item["streamid"]
+      @zoneid           = item["zoneid"]
+    else #get attributes from getex
       info = self.getex
-      @parentid        = info["parentid"]
-      @parentname      = info["parentname"]
-      @grandparentid   = info["grandparentid"]
-      @type            = info["type"]
-      @displayname     = info["displayname"]
-      @size            = info["size"]
-      @creatorname     = info["creatorname"]
-      @zoneid          = info["zoneid"]
-      @canupload       = info["canupload"]
-      @candownload     = info["candownload"]
-      @candelete       = info["candelete"]
-      @creationdate    = info["creationdate"]
-      @filename        = info["filename"]
-      @details         = info["details"]
-      @creatorid       = info["creatorid"]
-      @creatorfname    = info["creatorfname"]
-      @creatorlname    = info["creatorlname"]
-      @description     = info["description"]
-      @expirationdate  = info["expirationdate"]
-      @filecount       = info["filecount"]
-      @progenyeditdate = info["progenyeditdate"]
-      @streamid        = info["streamid"]
-      @commentcount    = info["commentcount"]
-      @isfavorite      = info["isfavorite"]
-      @ispinned        = info["ispinned"]
-      @ispersonal      = info["ispersonal"]
+      @type             = info["type"]
+      @filename         = info["filename"]
+      @displayname      = info["displayname"]
+      @size             = info["size"]
+      @creationdate     = info["creationdate"]
+      @creatorfname     = info["creatorfname"]
+      @creatorlname     = info["creatorlname"]
+      @description      = info["description"]
+      @descriptionhtml  = info["descriptionhtml"]
+      @expirationdate   = info["expirationdate"]
+      @parentid         = info["parentid"]
+      @parentname       = info["parentname"]
+      @url              = info["url"]
+      @previewstatus    = info["previewstatus"]
+      @virusstatus      = info["virusstatus"]
+      @md5              = info["md5"]
+      @thumb75          = info["thumb75"]
+      @thumb600         = info["thumb600"]
+      @creatorid        = info["creatorid"]
+      @streamid         = info["streamid"]
+      @zoneid           = info["zoneid"]
     end
   end
 
+  def prefix
+    "https://#{@subdomain}.sharefile.com/rest/file.aspx?fmt=json&authid=#{@authid}&id=#{@id}&op="
+  end
+
+  def response(url)
+    r = JSON.parse(open(url).read)
+    if r["error"] == false
+      return r["value"]
+    else
+      return r
+    end
+  end
+
+  def get
+    url = prefix + "get"
+    return response(url)
+  end
+
+  def getlink(requireuserinfo=false,expirationdays=30,notifyondownload=false, maxdownloads=-1)
+  end
+
+  def delete
+    url = prefix + "delete"
+    return response(url)
+  end
+
+  def rename(name)
+    url = prefix + "rename&name=#{name}"
+    return response(url)
+  end
+
+  def upload(filename, folderid=nil, unzip=true, overwrite=false, details=nil) #filename must include the extension
+  end
+
+  def download
+    url = prefix + "download"
+    return response(url)
+  end
+
   def getex
-    url = REQUEST_PREFIX+"getex&authid=#{@authid}&id=#{@id}"
-    return JSON.parse(open(url).read)["value"]
+    url = prefix + "getex"
+    return response(url)
   end
 
   def parent
-    return ShareFolder.new(@parentid, @authid)
+    return ShareFolder.new(@parentid, @authid, @subdomain)
   end
 
   def grandparent
-    return ShareFolder.new(@grandparentid, @authid)
+    return ShareFolder.new(@grandparentid, @authid, @subdomain)
   end
-
 
 end #ShareFile
  
+
+class ShareUser
+  attr_accessor :authid, :subdomain, :id, 
+                :firstname, 
+                :lastname, 
+                :email, 
+                :isemployee,
+                :company,
+                :createfolders,
+                :usefilebox,
+                :manageusers,
+                :isadmin,
+                :password
+
+  def initialize(id, authid, subdomain)
+    @id = id
+    @authid = authid
+    @subdomain = subdomain
+
+
+  end
+
+  def prefix
+    "https://#{@subdomain}.sharefile.com/rest/users.aspx?fmt=json&authid=#{@authid}&op="
+  end
+
+  def id_param
+    "&id=#{@id}"
+  end
+
+  def response(url)
+    r = JSON.parse(open(url).read)
+    if r["error"] == false
+      return r["value"]
+    else
+      return r
+    end
+  end
+
+  def get
+    url = prefix + "get" + id_param
+    return response(url)
+  end
+
+  def liste
+    url = prefix + "liste"
+    return response(url)
+  end
+
+  def listc
+    url = prefix + "listc"
+    return response(url)
+  end
+
+  def delete
+    url = prefix + "delete" + id_param
+    return response(url)
+  end
+
+  def deletef
+    url = prefix + "deletef" + id_param
+    return response(url)
+  end
+
+  def create(firstname, lastname, email, isemployee=false, company=nil, createfolders=false, usefilebox=false, manageusers=false, isadmin=false, password=nil)
+    
+  end
+
+  def update(firstname, lastname, email=nil)
+  end
+
+  def resetp(oldp,newp,notify=false)
+  end
+
+  def getex
+    url = prefix + "getex" + id_param
+    return response(url)
+  end
+end #ShareUser
+
+
+
 class ShareFileService
  
   attr_accessor :root_folder, :subdomain, :email, :password, :authid, :current_folder_id, :root_id
@@ -252,19 +418,19 @@ class ShareFileService
     @authid = JSON.parse(open(auth_url).read)["value"]
     root_id_url = "https://#{@subdomain}.sharefile.com/rest/folder.aspx?op=get&authid=#{@authid}&path=/&fmt=json"
     @root_id = JSON.parse(open(root_id_url).read)["value"]
-    @root_folder = ShareFolder.new(@root_id, @authid)
+    @root_folder = ShareFolder.new(@root_id, @authid, @subdomain)
   end
 
   def search(q) #returns a list of ShareFolder and ShareFile objects
     results = []
     url = "https://#{@subdomain}.sharefile.com/rest/search.aspx?op=search&query=#{q}&authid=#{@authid}&fmt=json"
     response = JSON.parse(open(url).read)
-    if response["value"] #success
+    if response["error"] == false #success
       response["value"].each do |item|
         if item["type"] == "folder"
-          results << ShareFolder.new(item["id"], @authid, item)
+          results << ShareFolder.new(item["id"], @authid, @subdomain, item)
         elsif item["type"] == "file"
-          results << ShareFile.new(item["id"], @authid, item)
+          results << ShareFile.new(item["id"], @authid, @subdomain, item)
         end
       end
       return results
