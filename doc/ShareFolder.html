@@ -74,15 +74,31 @@
     
     <li><a href="#method-i-create">#create</a>
     
+    <li><a href="#method-i-delete">#delete</a>
+    
     <li><a href="#method-i-fetch_children">#fetch_children</a>
     
     <li><a href="#method-i-get">#get</a>
     
+    <li><a href="#method-i-getacl">#getacl</a>
+    
     <li><a href="#method-i-getex">#getex</a>
+    
+    <li><a href="#method-i-grant">#grant</a>
     
     <li><a href="#method-i-list">#list</a>
     
     <li><a href="#method-i-listex">#listex</a>
+    
+    <li><a href="#method-i-prefix">#prefix</a>
+    
+    <li><a href="#method-i-rename">#rename</a>
+    
+    <li><a href="#method-i-request_url">#request_url</a>
+    
+    <li><a href="#method-i-response">#response</a>
+    
+    <li><a href="#method-i-revoke">#revoke</a>
     
   </ul>
 </nav>
@@ -106,6 +122,8 @@
   
     <li><a href="./ShareFolder.html">ShareFolder</a>
   
+    <li><a href="./ShareUser.html">ShareUser</a>
+  
   </ul>
 </nav>
 
@@ -127,19 +145,6 @@
 
     
 
-    
-    <!-- Constants -->
-    <section id="constants-list" class="section">
-      <h3 class="section-header">Constants</h3>
-      <dl>
-      
-        <dt id="REQUEST_PREFIX">REQUEST_PREFIX
-        
-        <dd class="description">
-        
-      
-      </dl>
-    </section>
     
 
     
@@ -499,6 +504,19 @@
         </div>
       </div>
       
+      <div id="attribute-i-subdomain" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">subdomain</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
       <div id="attribute-i-type" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">type</span><span
@@ -538,7 +556,7 @@
         
         <div class="method-heading">
           <span class="method-name">new</span><span
-            class="method-args">(id, authid, item=nil, include_children=false)</span>
+            class="method-args">(id, authid, subdomain, item=nil, include_children=false)</span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
         
@@ -550,13 +568,14 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 58</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">id</span>, <span class="ruby-identifier">authid</span>, <span class="ruby-identifier">item</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">include_children</span>=<span class="ruby-keyword">false</span>)
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 55</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">id</span>, <span class="ruby-identifier">authid</span>, <span class="ruby-identifier">subdomain</span>, <span class="ruby-identifier">item</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">include_children</span>=<span class="ruby-keyword">false</span>)
   <span class="ruby-ivar">@id</span> = <span class="ruby-identifier">id</span>
   <span class="ruby-ivar">@authid</span> = <span class="ruby-identifier">authid</span>
+  <span class="ruby-ivar">@subdomain</span> = <span class="ruby-identifier">subdomain</span>
   <span class="ruby-ivar">@children</span> = []
 
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span> <span class="ruby-comment">#create from item to avoid an extra API call</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span> <span class="ruby-comment">#get attributes from item to avoid an extra API call</span>
     <span class="ruby-ivar">@parentid</span>        = <span class="ruby-identifier">item</span>[<span class="ruby-string">&quot;parentid&quot;</span>]
     <span class="ruby-ivar">@parentname</span>      = <span class="ruby-identifier">item</span>[<span class="ruby-string">&quot;parentname&quot;</span>]
     <span class="ruby-ivar">@grandparentid</span>   = <span class="ruby-identifier">item</span>[<span class="ruby-string">&quot;grandparentid&quot;</span>]
@@ -583,7 +602,7 @@
     <span class="ruby-ivar">@isfavorite</span>      = <span class="ruby-identifier">item</span>[<span class="ruby-string">&quot;isfavorite&quot;</span>]
     <span class="ruby-ivar">@ispinned</span>        = <span class="ruby-identifier">item</span>[<span class="ruby-string">&quot;ispinned&quot;</span>]
     <span class="ruby-ivar">@ispersonal</span>      = <span class="ruby-identifier">item</span>[<span class="ruby-string">&quot;ispersonal&quot;</span>]
-  <span class="ruby-keyword">else</span> <span class="ruby-comment">#create from getex</span>
+  <span class="ruby-keyword">else</span> <span class="ruby-comment">#get attributes from getex</span>
     <span class="ruby-identifier">info</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">getex</span>
     <span class="ruby-ivar">@parentid</span>        = <span class="ruby-identifier">info</span>[<span class="ruby-string">&quot;parentid&quot;</span>]
     <span class="ruby-ivar">@parentname</span>      = <span class="ruby-identifier">info</span>[<span class="ruby-string">&quot;parentname&quot;</span>]
@@ -647,10 +666,10 @@
 
           
           <div class="method-source-code" id="create-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 133</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 144</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>(<span class="ruby-identifier">name</span>)
-  <span class="ruby-identifier">url</span> = <span class="ruby-constant">REQUEST_PREFIX</span><span class="ruby-operator">+</span><span class="ruby-node">&quot;create&amp;authid=#{@authid}&amp;id=#{@id}&amp;name=#{name}&quot;</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">open</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">read</span>)[<span class="ruby-string">&quot;value&quot;</span>]
+  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;create&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-node">&quot;&amp;name=#{name}&quot;</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
 <span class="ruby-keyword">end</span></pre>
           </div><!-- create-source -->
           
@@ -660,6 +679,37 @@
 
         
       </div><!-- create-method -->
+
+    
+      <div id="method-i-delete" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">delete</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="delete-source">
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 154</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">delete</span>
+  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;delete&quot;</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- delete-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- delete-method -->
 
     
       <div id="method-i-fetch_children" class="method-detail ">
@@ -678,7 +728,7 @@
 
           
           <div class="method-source-code" id="fetch_children-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 148</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 183</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">fetch_children</span>
   <span class="ruby-ivar">@children</span> = []
   <span class="ruby-keyword">for</span> <span class="ruby-identifier">item</span> <span class="ruby-keyword">in</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">listex</span>
@@ -715,10 +765,10 @@
 
           
           <div class="method-source-code" id="get-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 123</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 134</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">get</span>
-  <span class="ruby-identifier">url</span> = <span class="ruby-constant">REQUEST_PREFIX</span><span class="ruby-operator">+</span><span class="ruby-node">&quot;get&amp;authid=#{@authid}&amp;id=#{@id}&quot;</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">open</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">read</span>)[<span class="ruby-string">&quot;value&quot;</span>]
+  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;get&quot;</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
 <span class="ruby-keyword">end</span></pre>
           </div><!-- get-source -->
           
@@ -728,6 +778,37 @@
 
         
       </div><!-- get-method -->
+
+    
+      <div id="method-i-getacl" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">getacl</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="getacl-source">
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 178</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">getacl</span>
+  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;getacl&quot;</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- getacl-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- getacl-method -->
 
     
       <div id="method-i-getex" class="method-detail ">
@@ -746,10 +827,10 @@
 
           
           <div class="method-source-code" id="getex-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 128</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 139</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">getex</span>
-  <span class="ruby-identifier">url</span> = <span class="ruby-constant">REQUEST_PREFIX</span><span class="ruby-operator">+</span><span class="ruby-node">&quot;getex&amp;authid=#{@authid}&amp;id=#{@id}&quot;</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">open</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">read</span>)[<span class="ruby-string">&quot;value&quot;</span>]
+  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;getex&quot;</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
 <span class="ruby-keyword">end</span></pre>
           </div><!-- getex-source -->
           
@@ -759,6 +840,35 @@
 
         
       </div><!-- getex-method -->
+
+    
+      <div id="method-i-grant" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">grant</span><span
+            class="method-args">(userid=nil, email=nil, download=true, upload=false, view=true, admin=false, delete=false, notifyupload=false, notifydownload=false)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="grant-source">
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 167</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">grant</span>(<span class="ruby-identifier">userid</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">email</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">download</span>=<span class="ruby-keyword">true</span>, <span class="ruby-identifier">upload</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">view</span>=<span class="ruby-keyword">true</span>, <span class="ruby-identifier">admin</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">delete</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">notifyupload</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">notifydownload</span>=<span class="ruby-keyword">false</span>) <span class="ruby-comment">#(userid OR email) required</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- grant-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- grant-method -->
 
     
       <div id="method-i-list" class="method-detail ">
@@ -777,10 +887,10 @@
 
           
           <div class="method-source-code" id="list-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 138</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 149</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">list</span>
-  <span class="ruby-identifier">url</span> = <span class="ruby-constant">REQUEST_PREFIX</span><span class="ruby-operator">+</span><span class="ruby-node">&quot;list&amp;authid=#{@authid}&amp;id=#{@id}&quot;</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">open</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">read</span>)[<span class="ruby-string">&quot;value&quot;</span>]
+  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;list&quot;</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
 <span class="ruby-keyword">end</span></pre>
           </div><!-- list-source -->
           
@@ -808,10 +918,10 @@
 
           
           <div class="method-source-code" id="listex-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 143</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 173</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">listex</span>
-  <span class="ruby-identifier">url</span> = <span class="ruby-constant">REQUEST_PREFIX</span><span class="ruby-operator">+</span><span class="ruby-node">&quot;listex&amp;authid=#{@authid}&amp;id=#{@id}&quot;</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">open</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">read</span>)[<span class="ruby-string">&quot;value&quot;</span>]
+  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;listex&quot;</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
 <span class="ruby-keyword">end</span></pre>
           </div><!-- listex-source -->
           
@@ -821,6 +931,160 @@
 
         
       </div><!-- listex-method -->
+
+    
+      <div id="method-i-prefix" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">prefix</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="prefix-source">
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 121</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">prefix</span>
+  <span class="ruby-node">&quot;https://#{@subdomain}.sharefile.com/rest/folder.aspx?fmt=json&amp;authid=#{@authid}&amp;id=#{@id}&amp;op=&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- prefix-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- prefix-method -->
+
+    
+      <div id="method-i-rename" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">rename</span><span
+            class="method-args">(name)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="rename-source">
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 159</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">rename</span>(<span class="ruby-identifier">name</span>)
+  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-node">&quot;rename&amp;name=#{name}&quot;</span> 
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- rename-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- rename-method -->
+
+    
+      <div id="method-i-request_url" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">request_url</span><span
+            class="method-args">(requirelogin=false, requireuserinfo=false, expirationdays=30, notifyonupload=false)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="request_url-source">
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 164</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">request_url</span>(<span class="ruby-identifier">requirelogin</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">requireuserinfo</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">expirationdays</span>=<span class="ruby-value">30</span>, <span class="ruby-identifier">notifyonupload</span>=<span class="ruby-keyword">false</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- request_url-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- request_url-method -->
+
+    
+      <div id="method-i-response" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">response</span><span
+            class="method-args">(url)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="response-source">
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 125</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
+  <span class="ruby-identifier">r</span> = <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">open</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">read</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">r</span>[<span class="ruby-string">&quot;error&quot;</span>] <span class="ruby-operator">==</span> <span class="ruby-keyword">false</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">r</span>[<span class="ruby-string">&quot;value&quot;</span>]
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">r</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- response-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- response-method -->
+
+    
+      <div id="method-i-revoke" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">revoke</span><span
+            class="method-args">(userid=nil, email=nil)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="revoke-source">
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 170</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">revoke</span>(<span class="ruby-identifier">userid</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">email</span>=<span class="ruby-keyword">nil</span>) <span class="ruby-comment">#(userid OR email) required</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- revoke-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- revoke-method -->
 
     
     </section><!-- public-instance-method-details -->
