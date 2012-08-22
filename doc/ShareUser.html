@@ -82,17 +82,11 @@
     
     <li><a href="#method-i-getex">#getex</a>
     
-    <li><a href="#method-i-id_param">#id_param</a>
-    
     <li><a href="#method-i-listc">#listc</a>
     
     <li><a href="#method-i-liste">#liste</a>
     
-    <li><a href="#method-i-prefix">#prefix</a>
-    
     <li><a href="#method-i-resetp">#resetp</a>
-    
-    <li><a href="#method-i-response">#response</a>
     
     <li><a href="#method-i-update">#update</a>
     
@@ -343,13 +337,13 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 341</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 377</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">id</span>, <span class="ruby-identifier">authid</span>, <span class="ruby-identifier">subdomain</span>)
   <span class="ruby-ivar">@id</span> = <span class="ruby-identifier">id</span>
   <span class="ruby-ivar">@authid</span> = <span class="ruby-identifier">authid</span>
   <span class="ruby-ivar">@subdomain</span> = <span class="ruby-identifier">subdomain</span>
 
-
+  <span class="ruby-comment">#TODO full init</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- new-source -->
           
@@ -378,14 +372,14 @@
 
         <div class="method-description">
           
-          
+          <p>(not implemented) Passing in the required parameters, a user is created in
+the system as either a client or an employee of the account.</p>
           
 
           
           <div class="method-source-code" id="create-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 391</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>(<span class="ruby-identifier">firstname</span>, <span class="ruby-identifier">lastname</span>, <span class="ruby-identifier">email</span>, <span class="ruby-identifier">isemployee</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">company</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">createfolders</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">usefilebox</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">manageusers</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">isadmin</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">password</span>=<span class="ruby-keyword">nil</span>)
-  
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 416</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>(<span class="ruby-identifier">firstname</span>, <span class="ruby-identifier">lastname</span>, <span class="ruby-identifier">email</span>, <span class="ruby-identifier">isemployee</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">company</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">createfolders</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">usefilebox</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">manageusers</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">isadmin</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">password</span>=<span class="ruby-keyword">nil</span>)    
 <span class="ruby-keyword">end</span></pre>
           </div><!-- create-source -->
           
@@ -408,12 +402,14 @@
 
         <div class="method-description">
           
-          
+          <p>Calling this will delete the user completely from the system. Note: This
+operation may take several minutes depending on the number of associated
+folders the user is assigned to.</p>
           
 
           
           <div class="method-source-code" id="delete-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 381</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 404</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">delete</span>
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;delete&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">id_param</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
@@ -439,12 +435,14 @@
 
         <div class="method-description">
           
-          
+          <p>Calling this will delete the user from all folders ONLY but not the system.
+Note: This operation may take several minutes depending on the number of
+associated folders the user is assigned to.</p>
           
 
           
           <div class="method-source-code" id="deletef-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 386</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 410</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">deletef</span>
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;deletef&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">id_param</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
@@ -470,12 +468,12 @@
 
         <div class="method-description">
           
-          
+          <p>Returns the user metadata.</p>
           
 
           
           <div class="method-source-code" id="get-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 366</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 386</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">get</span>
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;get&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">id_param</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
@@ -501,12 +499,12 @@
 
         <div class="method-description">
           
-          
+          <p>Returns additional information about the user.</p>
           
 
           
           <div class="method-source-code" id="getex-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 401</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 428</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">getex</span>
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;getex&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">id_param</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
@@ -521,36 +519,6 @@
       </div><!-- getex-method -->
 
     
-      <div id="method-i-id_param" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">id_param</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="id_param-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 353</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">id_param</span>
-  <span class="ruby-node">&quot;&amp;id=#{@id}&quot;</span>
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- id_param-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- id_param-method -->
-
-    
       <div id="method-i-listc" class="method-detail ">
         
         <div class="method-heading">
@@ -562,12 +530,12 @@
 
         <div class="method-description">
           
-          
+          <p>Returns a list of all the account clients.</p>
           
 
           
           <div class="method-source-code" id="listc-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 376</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 398</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">listc</span>
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;listc&quot;</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
@@ -593,12 +561,12 @@
 
         <div class="method-description">
           
-          
+          <p>Returns a list of all the account employees.</p>
           
 
           
           <div class="method-source-code" id="liste-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 371</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 392</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">liste</span>
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;liste&quot;</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
@@ -613,36 +581,6 @@
       </div><!-- liste-method -->
 
     
-      <div id="method-i-prefix" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">prefix</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="prefix-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 349</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">prefix</span>
-  <span class="ruby-node">&quot;https://#{@subdomain}.sharefile.com/rest/users.aspx?fmt=json&amp;authid=#{@authid}&amp;op=&quot;</span>
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- prefix-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- prefix-method -->
-
-    
       <div id="method-i-resetp" class="method-detail ">
         
         <div class="method-heading">
@@ -654,12 +592,12 @@
 
         <div class="method-description">
           
-          
+          <p>(not implemented) Calling this will reset the specified users password.</p>
           
 
           
           <div class="method-source-code" id="resetp-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 398</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 424</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">resetp</span>(<span class="ruby-identifier">oldp</span>,<span class="ruby-identifier">newp</span>,<span class="ruby-identifier">notify</span>=<span class="ruby-keyword">false</span>)
 <span class="ruby-keyword">end</span></pre>
           </div><!-- resetp-source -->
@@ -670,41 +608,6 @@
 
         
       </div><!-- resetp-method -->
-
-    
-      <div id="method-i-response" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">response</span><span
-            class="method-args">(url)</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="response-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 357</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
-  <span class="ruby-identifier">r</span> = <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">open</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">read</span>)
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">r</span>[<span class="ruby-string">&quot;error&quot;</span>] <span class="ruby-operator">==</span> <span class="ruby-keyword">false</span>
-    <span class="ruby-keyword">return</span> <span class="ruby-identifier">r</span>[<span class="ruby-string">&quot;value&quot;</span>]
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-keyword">return</span> <span class="ruby-identifier">r</span>
-  <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- response-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- response-method -->
 
     
       <div id="method-i-update" class="method-detail ">
@@ -718,12 +621,13 @@
 
         <div class="method-description">
           
-          
+          <p>(not implemented) Passing in the required parameters, a user is updated in
+the system. Other specific updates must be made to separate operators.</p>
           
 
           
           <div class="method-source-code" id="update-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 395</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 420</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>(<span class="ruby-identifier">firstname</span>, <span class="ruby-identifier">lastname</span>, <span class="ruby-identifier">email</span>=<span class="ruby-keyword">nil</span>)
 <span class="ruby-keyword">end</span></pre>
           </div><!-- update-source -->

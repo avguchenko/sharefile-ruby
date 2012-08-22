@@ -4,8 +4,9 @@ require 'open-uri'
 require 'net/https'
 require 'json'
 require 'yaml'
- 
-module Net #use local certs to make SSL work
+
+# using local certs to make SSL work
+module Net 
   class HTTP
     alias_method :original_use_ssl=, :use_ssl=
    
@@ -118,6 +119,90 @@ class ShareFolder
     fetch_children if include_children
   end
 
+  # Returns id of the current folder verifying it exists
+  def get
+    url = prefix + "get"
+    return response(url)
+  end       
+
+  # Returns all metadata of the requested folder id
+  def getex
+    url = prefix + "getex"
+    return response(url)
+  end
+
+  # Passing the required "name" parameter creates a folder with this name. Optionally, passing an "overwrite" parameter as true/false, will overwrite an existing folder if true.
+  def create(name)
+    url = prefix + "create" + "&name=#{name}"
+    return response(url)
+  end
+
+  # Returns a list of all sub-folders and files in the current folder
+  def list
+    url = prefix + "list"
+    return response(url)
+  end
+
+  # Deletes a folder given the passed in "id" parameter and all children of this folder.
+  def delete
+    url = prefix + "delete"
+    return response(url)
+  end
+
+  # Passing the required "name" parameter will change a folders name to what is passed.
+  def rename(name)
+    url = prefix + "rename&name=#{name}" 
+    return response(url)
+  end
+
+  # (not implemented) Calling this function will return a link directly to a specified folder given the "id" parameter of a folder.
+  def request_url(requirelogin=false, requireuserinfo=false, expirationdays=30, notifyonupload=false)
+  end
+
+  # (not implemented) Grants folder privileges to the given user.
+  def grant(userid=nil, email=nil, download=true, upload=false, view=true, admin=false, delete=false, notifyupload=false, notifydownload=false) #(userid OR email) required
+  end
+  
+  # (not implemented) Revokes folder privileges from the given user
+  def revoke(userid=nil, email=nil) #(userid OR email) required
+  end
+
+  # Returns a list of all sub-folders and files in the current folder with additional information.
+  def listex
+    url = prefix + "listex"
+    return response(url)
+  end
+
+  # Returns a permission list for the given folder.
+  def getacl
+    url = prefix + "getacl"
+    return response(url)
+  end
+
+  # populates ShareFolder.children list. Can be done at initialize using include_children=true
+  def fetch_children
+    @children = []
+    for item in self.listex
+      if item["type"] == "folder" and item["id"]!=@id #sharefile API includes self in list
+        @children << ShareFolder.new(item["id"], @authid, item)
+      elsif item["type"] == "file"
+        @children << ShareFile.new(item["id"], @authid, item)
+      end
+    end
+  end
+
+  # Returns a ShareFolder object that is the parent of self
+  def parent
+    return ShareFolder.new(@parentid, @authid, @subdomain)
+  end
+
+  # Returns a ShareFolder object that is the grandparent of self
+  def grandparent
+    return ShareFolder.new(@grandparentid, @authid, @subdomain)
+  end
+
+private
+
   def prefix
     "https://#{@subdomain}.sharefile.com/rest/folder.aspx?fmt=json&authid=#{@authid}&id=#{@id}&op="
   end
@@ -128,66 +213,6 @@ class ShareFolder
       return r["value"]
     else
       return r
-    end
-  end
-
-  def get
-    url = prefix + "get"
-    return response(url)
-  end       
-
-  def getex
-    url = prefix + "getex"
-    return response(url)
-  end
-
-  def create(name)
-    url = prefix + "create" + "&name=#{name}"
-    return response(url)
-  end
-
-  def list
-    url = prefix + "list"
-    return response(url)
-  end
-
-  def delete
-    url = prefix + "delete"
-    return response(url)
-  end
-
-  def rename(name)
-    url = prefix + "rename&name=#{name}" 
-    return response(url)
-  end
-
-  def request_url(requirelogin=false, requireuserinfo=false, expirationdays=30, notifyonupload=false)
-  end
-
-  def grant(userid=nil, email=nil, download=true, upload=false, view=true, admin=false, delete=false, notifyupload=false, notifydownload=false) #(userid OR email) required
-  end
-  
-  def revoke(userid=nil, email=nil) #(userid OR email) required
-  end
-
-  def listex
-    url = prefix + "listex"
-    return response(url)
-  end
-
-  def getacl
-    url = prefix + "getacl"
-    return response(url)
-  end
-
-  def fetch_children
-    @children = []
-    for item in self.listex
-      if item["type"] == "folder" and item["id"]!=@id #sharefile API includes self in list
-        @children << ShareFolder.new(item["id"], @authid, item)
-      elsif item["type"] == "file"
-        @children << ShareFile.new(item["id"], @authid, item)
-      end
     end
   end
 end #ShareFolder
@@ -270,6 +295,56 @@ class ShareFile
     end
   end
 
+  # Returns all metadata of the requested file id.
+  def get
+    url = prefix + "get"
+    return response(url)
+  end
+
+  # (not implemented) Generates a public link for download.
+  def getlink(requireuserinfo=false,expirationdays=30,notifyondownload=false, maxdownloads=-1)
+  end
+
+  # Removes a file from the system. Files can be recovered within 7 days, but not currently through the API.
+  def delete
+    url = prefix + "delete"
+    return response(url)
+  end
+
+  # Passing the required "name" parameter will change a files name to what is passed.
+  def rename(name)
+    url = prefix + "rename&name=#{name}"
+    return response(url)
+  end
+
+  # (not implemented) Passing the required parameters will create the file in the specified folder AFTER the upload has completed. Since a file cannot exist without a physical file uploaded, if the upload fails or is cancelled before all data has been transferred to ShareFile, this file will not exist. "filename" must include the extension.
+  def upload(filename, folderid=nil, unzip=true, overwrite=false, details=nil) #filename must include the extension
+  end
+
+  # Returns a direct link to download the file.
+  def download
+    url = prefix + "download"
+    return response(url)
+  end
+
+  # Returns additional data for the requested file.
+  def getex
+    url = prefix + "getex"
+    return response(url)
+  end
+
+  # Returns a ShareFolder object that is the parent of self
+  def parent
+    return ShareFolder.new(@parentid, @authid, @subdomain)
+  end
+
+  # Returns a ShareFolder object that is the grandparent of self
+  def grandparent
+    return ShareFolder.new(@grandparentid, @authid, @subdomain)
+  end
+
+private
+
   def prefix
     "https://#{@subdomain}.sharefile.com/rest/file.aspx?fmt=json&authid=#{@authid}&id=#{@id}&op="
   end
@@ -281,45 +356,6 @@ class ShareFile
     else
       return r
     end
-  end
-
-  def get
-    url = prefix + "get"
-    return response(url)
-  end
-
-  def getlink(requireuserinfo=false,expirationdays=30,notifyondownload=false, maxdownloads=-1)
-  end
-
-  def delete
-    url = prefix + "delete"
-    return response(url)
-  end
-
-  def rename(name)
-    url = prefix + "rename&name=#{name}"
-    return response(url)
-  end
-
-  def upload(filename, folderid=nil, unzip=true, overwrite=false, details=nil) #filename must include the extension
-  end
-
-  def download
-    url = prefix + "download"
-    return response(url)
-  end
-
-  def getex
-    url = prefix + "getex"
-    return response(url)
-  end
-
-  def parent
-    return ShareFolder.new(@parentid, @authid, @subdomain)
-  end
-
-  def grandparent
-    return ShareFolder.new(@grandparentid, @authid, @subdomain)
   end
 
 end #ShareFile
@@ -343,16 +379,58 @@ class ShareUser
     @authid = authid
     @subdomain = subdomain
 
-
+    #TODO full init
   end
 
-  def prefix
-    "https://#{@subdomain}.sharefile.com/rest/users.aspx?fmt=json&authid=#{@authid}&op="
+  # Returns the user metadata.
+  def get
+    url = prefix + "get" + id_param
+    return response(url)
   end
 
-  def id_param
-    "&id=#{@id}"
+  # Returns a list of all the account employees.
+  def liste
+    url = prefix + "liste"
+    return response(url)
   end
+
+  # Returns a list of all the account clients.
+  def listc
+    url = prefix + "listc"
+    return response(url)
+  end
+
+  # Calling this will delete the user completely from the system. Note: This operation may take several minutes depending on the number of associated folders the user is assigned to.
+  def delete
+    url = prefix + "delete" + id_param
+    return response(url)
+  end
+
+  # Calling this will delete the user from all folders ONLY but not the system. Note: This operation may take several minutes depending on the number of associated folders the user is assigned to.
+  def deletef
+    url = prefix + "deletef" + id_param
+    return response(url)
+  end
+
+  # (not implemented) Passing in the required parameters, a user is created in the system as either a client or an employee of the account.
+  def create(firstname, lastname, email, isemployee=false, company=nil, createfolders=false, usefilebox=false, manageusers=false, isadmin=false, password=nil)    
+  end
+
+  # (not implemented) Passing in the required parameters, a user is updated in the system. Other specific updates must be made to separate operators.
+  def update(firstname, lastname, email=nil)
+  end
+
+  # (not implemented) Calling this will reset the specified users password.
+  def resetp(oldp,newp,notify=false)
+  end
+
+  # Returns additional information about the user.
+  def getex
+    url = prefix + "getex" + id_param
+    return response(url)
+  end
+
+private
 
   def response(url)
     r = JSON.parse(open(url).read)
@@ -363,49 +441,30 @@ class ShareUser
     end
   end
 
-  def get
-    url = prefix + "get" + id_param
-    return response(url)
+  def prefix
+    "https://#{@subdomain}.sharefile.com/rest/users.aspx?fmt=json&authid=#{@authid}&op="
   end
 
-  def liste
-    url = prefix + "liste"
-    return response(url)
+  def id_param
+    "&id=#{@id}"
   end
 
-  def listc
-    url = prefix + "listc"
-    return response(url)
-  end
-
-  def delete
-    url = prefix + "delete" + id_param
-    return response(url)
-  end
-
-  def deletef
-    url = prefix + "deletef" + id_param
-    return response(url)
-  end
-
-  def create(firstname, lastname, email, isemployee=false, company=nil, createfolders=false, usefilebox=false, manageusers=false, isadmin=false, password=nil)
-    
-  end
-
-  def update(firstname, lastname, email=nil)
-  end
-
-  def resetp(oldp,newp,notify=false)
-  end
-
-  def getex
-    url = prefix + "getex" + id_param
-    return response(url)
-  end
 end #ShareUser
 
 
+=begin rdoc
+ This is how you make the initial connection to sharefile API.
 
+ +connection+ = +ShareFileService+.+new+("_yoursubdomain_", "_youremail_", "_yourpassword_")
+ 
+ +root+ = +connection+.+root_folder+ => ShareFolder object that is the root of your sharefile account
+ 
+ +root+.+fetch_children+ -- call explicitly to avoid unneeded API calls
+ 
+ +root+.+children+ => list of ShareFolder and ShareFile objects in the root. Populated by +fetch_children+, otherwise empty list.
+ 
+ +connection+.+search+("_superimportantfile.txt_") => list of ShareFolder and ShareFile objects matching your search from sharefile.
+=end
 class ShareFileService
  
   attr_accessor :root_folder, :subdomain, :email, :password, :authid, :current_folder_id, :root_id
@@ -421,7 +480,8 @@ class ShareFileService
     @root_folder = ShareFolder.new(@root_id, @authid, @subdomain)
   end
 
-  def search(q) #returns a list of ShareFolder and ShareFile objects
+  # Returns a list of ShareFolder and ShareFile objects.
+  def search(q)
     results = []
     url = "https://#{@subdomain}.sharefile.com/rest/search.aspx?op=search&query=#{q}&authid=#{@authid}&fmt=json"
     response = JSON.parse(open(url).read)

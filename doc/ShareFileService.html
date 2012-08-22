@@ -109,6 +109,29 @@
 
   <div id="description" class="description">
     
+<p>This is how you make the initial connection to sharefile API.</p>
+
+<p><code>connection</code> =
+<code>ShareFileService</code>.<code>new</code>("<em>yoursubdomain</em>",
+"<em>youremail</em>", "<em>yourpassword</em>")</p>
+
+<p><code>root</code> = <code>connection</code>.<code>root_folder</code> =&gt;
+<a href="ShareFolder.html">ShareFolder</a> object that is the root of your
+sharefile account</p>
+
+<p><code>root</code>.<code>fetch_children</code> -- call explicitly to avoid
+unneeded API calls</p>
+
+<p><code>root</code>.<code>children</code> =&gt; list of <a
+href="ShareFolder.html">ShareFolder</a> and <a
+href="ShareFile.html">ShareFile</a> objects in the root. Populated by
+<code>fetch_children</code>, otherwise empty list.</p>
+
+<p><code>connection</code>.<code>search</code>("<em>superimportantfile.txt</em>")
+=&gt; list of <a href="ShareFolder.html">ShareFolder</a> and <a
+href="ShareFile.html">ShareFile</a> objects matching your search from
+sharefile.</p>
+
   </div><!-- description -->
 
   
@@ -243,7 +266,7 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 413</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 472</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">subdomain</span>,<span class="ruby-identifier">email</span>,<span class="ruby-identifier">password</span>)
   <span class="ruby-ivar">@subdomain</span> = <span class="ruby-identifier">subdomain</span>
   <span class="ruby-ivar">@email</span> = <span class="ruby-identifier">email</span>
@@ -281,13 +304,14 @@
 
         <div class="method-description">
           
-          
+          <p>Returns a list of <a href="ShareFolder.html">ShareFolder</a> and <a
+href="ShareFile.html">ShareFile</a> objects.</p>
           
 
           
           <div class="method-source-code" id="search-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 424</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">search</span>(<span class="ruby-identifier">q</span>) <span class="ruby-comment">#returns a list of ShareFolder and ShareFile objects</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 484</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">search</span>(<span class="ruby-identifier">q</span>)
   <span class="ruby-identifier">results</span> = []
   <span class="ruby-identifier">url</span> = <span class="ruby-node">&quot;https://#{@subdomain}.sharefile.com/rest/search.aspx?op=search&amp;query=#{q}&amp;authid=#{@authid}&amp;fmt=json&quot;</span>
   <span class="ruby-identifier">response</span> = <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">open</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">read</span>)

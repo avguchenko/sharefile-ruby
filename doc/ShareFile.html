@@ -86,11 +86,7 @@
     
     <li><a href="#method-i-parent">#parent</a>
     
-    <li><a href="#method-i-prefix">#prefix</a>
-    
     <li><a href="#method-i-rename">#rename</a>
-    
-    <li><a href="#method-i-response">#response</a>
     
     <li><a href="#method-i-upload">#upload</a>
     
@@ -484,7 +480,7 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 220</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 245</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">id</span>, <span class="ruby-identifier">authid</span>, <span class="ruby-identifier">subdomain</span>, <span class="ruby-identifier">item</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-ivar">@id</span> = <span class="ruby-identifier">id</span>
   <span class="ruby-ivar">@authid</span> = <span class="ruby-identifier">authid</span>
@@ -564,12 +560,13 @@
 
         <div class="method-description">
           
-          
+          <p>Removes a file from the system. Files can be recovered within 7 days, but
+not currently through the API.</p>
           
 
           
           <div class="method-source-code" id="delete-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 294</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 309</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">delete</span>
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;delete&quot;</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
@@ -595,12 +592,12 @@
 
         <div class="method-description">
           
-          
+          <p>Returns a direct link to download the file.</p>
           
 
           
           <div class="method-source-code" id="download-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 307</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 325</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">download</span>
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;download&quot;</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
@@ -626,12 +623,12 @@
 
         <div class="method-description">
           
-          
+          <p>Returns all metadata of the requested file id.</p>
           
 
           
           <div class="method-source-code" id="get-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 286</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 299</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">get</span>
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;get&quot;</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
@@ -657,12 +654,12 @@
 
         <div class="method-description">
           
-          
+          <p>Returns additional data for the requested file.</p>
           
 
           
           <div class="method-source-code" id="getex-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 312</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 331</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">getex</span>
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;getex&quot;</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
@@ -688,12 +685,12 @@
 
         <div class="method-description">
           
-          
+          <p>(not implemented) Generates a public link for download.</p>
           
 
           
           <div class="method-source-code" id="getlink-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 291</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 305</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">getlink</span>(<span class="ruby-identifier">requireuserinfo</span>=<span class="ruby-keyword">false</span>,<span class="ruby-identifier">expirationdays</span>=<span class="ruby-value">30</span>,<span class="ruby-identifier">notifyondownload</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">maxdownloads</span>=<span class="ruby-value">-1</span>)
 <span class="ruby-keyword">end</span></pre>
           </div><!-- getlink-source -->
@@ -717,12 +714,13 @@
 
         <div class="method-description">
           
-          
+          <p>Returns a <a href="ShareFolder.html">ShareFolder</a> object that is the
+grandparent of self</p>
           
 
           
           <div class="method-source-code" id="grandparent-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 321</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 342</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">grandparent</span>
   <span class="ruby-keyword">return</span> <span class="ruby-constant">ShareFolder</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@grandparentid</span>, <span class="ruby-ivar">@authid</span>, <span class="ruby-ivar">@subdomain</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -747,12 +745,13 @@
 
         <div class="method-description">
           
-          
+          <p>Returns a <a href="ShareFolder.html">ShareFolder</a> object that is the
+parent of self</p>
           
 
           
           <div class="method-source-code" id="parent-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 317</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 337</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">parent</span>
   <span class="ruby-keyword">return</span> <span class="ruby-constant">ShareFolder</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@parentid</span>, <span class="ruby-ivar">@authid</span>, <span class="ruby-ivar">@subdomain</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -766,36 +765,6 @@
       </div><!-- parent-method -->
 
     
-      <div id="method-i-prefix" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">prefix</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="prefix-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 273</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">prefix</span>
-  <span class="ruby-node">&quot;https://#{@subdomain}.sharefile.com/rest/file.aspx?fmt=json&amp;authid=#{@authid}&amp;id=#{@id}&amp;op=&quot;</span>
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- prefix-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- prefix-method -->
-
-    
       <div id="method-i-rename" class="method-detail ">
         
         <div class="method-heading">
@@ -807,12 +776,13 @@
 
         <div class="method-description">
           
-          
+          <p>Passing the required "name" parameter will change a files name to what is
+passed.</p>
           
 
           
           <div class="method-source-code" id="rename-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 299</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 315</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">rename</span>(<span class="ruby-identifier">name</span>)
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">prefix</span> <span class="ruby-operator">+</span> <span class="ruby-node">&quot;rename&amp;name=#{name}&quot;</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
@@ -827,41 +797,6 @@
       </div><!-- rename-method -->
 
     
-      <div id="method-i-response" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">response</span><span
-            class="method-args">(url)</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="response-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 277</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">response</span>(<span class="ruby-identifier">url</span>)
-  <span class="ruby-identifier">r</span> = <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">open</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">read</span>)
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">r</span>[<span class="ruby-string">&quot;error&quot;</span>] <span class="ruby-operator">==</span> <span class="ruby-keyword">false</span>
-    <span class="ruby-keyword">return</span> <span class="ruby-identifier">r</span>[<span class="ruby-string">&quot;value&quot;</span>]
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-keyword">return</span> <span class="ruby-identifier">r</span>
-  <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- response-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- response-method -->
-
-    
       <div id="method-i-upload" class="method-detail ">
         
         <div class="method-heading">
@@ -873,12 +808,17 @@
 
         <div class="method-description">
           
-          
+          <p>(not implemented) Passing the required parameters will create the file in
+the specified folder AFTER the upload has completed. Since a file cannot
+exist without a physical file uploaded, if the upload fails or is cancelled
+before all data has been transferred to <a
+href="ShareFile.html">ShareFile</a>, this file will not exist. "filename"
+must include the extension.</p>
           
 
           
           <div class="method-source-code" id="upload-source">
-            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 304</span>
+            <pre><span class="ruby-comment"># File sharefile-ruby.rb, line 321</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">upload</span>(<span class="ruby-identifier">filename</span>, <span class="ruby-identifier">folderid</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">unzip</span>=<span class="ruby-keyword">true</span>, <span class="ruby-identifier">overwrite</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">details</span>=<span class="ruby-keyword">nil</span>) <span class="ruby-comment">#filename must include the extension</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- upload-source -->
