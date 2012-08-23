@@ -38,11 +38,16 @@ results = myaccount.search("superimportantfile.txt")
 
 ### Parents
 
-`ShareFolder` and `ShareFile` objects have a `parent` and a `grandparent` if lineage allows:
+`ShareFile` gets a `parent` and a `grandparent` (of type `ShareFolder`) at initialization, if lineage allows.
+`ShareFolder` doesn't. Call `fetch_parent` or `fetch_grandparent` if you need them.
+
 ````
 results.each do |r|
-	puts "#{r.displayname}'s parent is #{r.parent.displayname}\n"
-	puts "#{r.displayname}'s grandparent is #{r.grandparent.displayname}\n"
+	r.fetch_parent if !r.parent
+	r.fetch_grandparent if !r.grandparent
+	puts "my name is #{r.displayname}\n"
+	puts "    my parent is #{r.parent.displayname}\n"
+	puts "    my grandparent is #{r.grandparent.displayname}\n"
 end
 ````
 

@@ -22,16 +22,13 @@ module Net
 end
  
 class ShareFolder
- 
   attr_accessor :id, :authid, :subdomain,
-                
                 :children,
                 :parent,
                 :grandparent,
                 :parentid,
                 :parentname,
                 :grandparentid,
-
                 :type,
                 :displayname,
                 :size,
@@ -57,7 +54,7 @@ class ShareFolder
                 :ispersonal
 
  
-  def initialize(id, authid, subdomain, item=nil, include_children=false)
+  def initialize(id, authid, subdomain, include_children=false, item=nil)
     @id = id
     @authid = authid
     @subdomain = subdomain
@@ -92,16 +89,8 @@ class ShareFolder
     @isfavorite      = item["isfavorite"]
     @ispinned        = item["ispinned"]
     @ispersonal      = item["ispersonal"]
-    
-    if @type and @type != "account"
-        @parent = ShareFolder.new(@parentid, @authid, @subdomain)
-    end
-    
-    if @parent and @parent.type != "account"
-      @grandparent = ShareFolder.new(@grandparentid, @authid, @subdomain)
-    end
 
-    fetch_children     if include_children
+    fetch_children if include_children
   end
 
   # Passing the required "name" parameter creates a folder with this name. Optionally, passing an "overwrite" parameter as true/false, will overwrite an existing folder if true.
@@ -145,11 +134,19 @@ class ShareFolder
     @children = []
     for item in self.listex
       if item["type"] == "folder" and item["id"]!=@id #sharefile API includes self in list
-        @children << ShareFolder.new(item["id"], @authid, item)
+        @children << ShareFolder.new(item["id"], @authid, false, item)
       elsif item["type"] == "file"
         @children << ShareFile.new(item["id"], @authid, item)
       end
     end
+  end
+
+  def fetch_parent
+      @parent = ShareFolder.new(@parentid, @authid, @subdomain)
+  end
+
+  def fetch_grandparent
+      @grandparent = ShareFolder.new(@grandparentid, @authid, @subdomain)
   end
 
 protected
@@ -194,7 +191,6 @@ protected
 end #ShareFolder
  
 class ShareFile
- 
   attr_accessor :id, :authid, :subdomain,
                 :type,
                 :filename,
@@ -206,11 +202,10 @@ class ShareFile
                 :description,
                 :descriptionhtml,
                 :expirationdate,
-
                 :parentid,
                 :parentname,
                 :parent,
-
+                :grandparent,
                 :url,
                 :previewstatus,
                 :virusstatus,
@@ -252,6 +247,7 @@ class ShareFile
     @zoneid           = item["zoneid"]
 
     @parent = ShareFolder.new(@parentid, @authid, @subdomain)
+    @parent.fetch_parent
     @grandparent = @parent.parent
   end
 
@@ -494,7 +490,7 @@ class ShareFileService
     if response["error"] == false #success
       response["value"].each do |item|
         if item["type"] == "folder"
-          results << ShareFolder.new(item["id"], @authid, @subdomain, item)
+          results << ShareFolder.new(item["id"], @authid, @subdomain, false, item)
         elsif item["type"] == "file"
           results << ShareFile.new(item["id"], @authid, @subdomain, item)
         end
