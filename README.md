@@ -36,6 +36,17 @@ results = myaccount.search("superimportantfile.txt")
 ````
 `results` is now a list of `ShareFolder` and `ShareFile` objects matching your search, according to ShareFile.
 
+### Download
+
+````
+results.each do |r|
+	if r.type == "file"
+		r.download(local_path)
+	end
+end
+````
+Give it a local path or look for the downloads in your local user folder (wherever ruby wants to put it)
+
 ### Parents
 
 `ShareFile` gets a `parent` and a `grandparent` (of type `ShareFolder`) at initialization, if lineage allows.
@@ -45,11 +56,13 @@ results = myaccount.search("superimportantfile.txt")
 results.each do |r|
 	r.fetch_parent if !r.parent
 	r.fetch_grandparent if !r.grandparent
-	puts "my name is #{r.displayname}\n"
-	puts "    my parent is #{r.parent.displayname}\n"
-	puts "    my grandparent is #{r.grandparent.displayname}\n"
+	puts "My name is #{r.displayname}. I am a #{r.type}\n"
+	puts "    My parent is #{r.parent.displayname}\n"
+	puts "    My grandparent is #{r.grandparent.displayname}\n"
 end
 ````
+
+
 
 ## Users
 

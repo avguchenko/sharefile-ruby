@@ -272,9 +272,15 @@ class ShareFile
   end
 
   # Returns a direct link to download the file.
-  def download
+  def download(save_path="")
     url = prefix + "download"
-    return response(url)
+    r = response(url) 
+    if r.class == String #success
+      open(File.join(save_path,@filename), "wb").write(open(r).read)
+      return r
+    else #failed
+      return r
+    end
   end
 
 protected
