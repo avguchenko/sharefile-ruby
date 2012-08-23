@@ -24,10 +24,14 @@ end
 class ShareFolder
  
   attr_accessor :id, :authid, :subdomain,
+                
                 :children,
+                :parent,
+                :grandparent,
                 :parentid,
                 :parentname,
                 :grandparentid,
+
                 :type,
                 :displayname,
                 :size,
@@ -59,87 +63,50 @@ class ShareFolder
     @subdomain = subdomain
     @children = []
 
-    if item #get attributes from item to avoid an extra API call
-      @parentid        = item["parentid"]
-      @parentname      = item["parentname"]
-      @grandparentid   = item["grandparentid"]
-      @type            = item["type"]
-      @displayname     = item["displayname"]
-      @size            = item["size"]
-      @creatorname     = item["creatorname"]
-      @zoneid          = item["zoneid"]
-      @canupload       = item["canupload"]
-      @candownload     = item["candownload"]
-      @candelete       = item["candelete"]
-      @creationdate    = item["creationdate"]
-      @filename        = item["filename"]
-      @details         = item["details"]
-      @creatorid       = item["creatorid"]
-      @creatorfname    = item["creatorfname"]
-      @creatorlname    = item["creatorlname"]
-      @description     = item["description"]
-      @expirationdate  = item["expirationdate"]
-      @filecount       = item["filecount"]
-      @progenyeditdate = item["progenyeditdate"]
-      @streamid        = item["streamid"]
-      @commentcount    = item["commentcount"]
-      @isfavorite      = item["isfavorite"]
-      @ispinned        = item["ispinned"]
-      @ispersonal      = item["ispersonal"]
-    else #get attributes from getex
-      info = self.getex
-      @parentid        = info["parentid"]
-      @parentname      = info["parentname"]
-      @grandparentid   = info["grandparentid"]
-      @type            = info["type"]
-      @displayname     = info["displayname"]
-      @size            = info["size"]
-      @creatorname     = info["creatorname"]
-      @zoneid          = info["zoneid"]
-      @canupload       = info["canupload"]
-      @candownload     = info["candownload"]
-      @candelete       = info["candelete"]
-      @creationdate    = info["creationdate"]
-      @filename        = info["filename"]
-      @details         = info["details"]
-      @creatorid       = info["creatorid"]
-      @creatorfname    = info["creatorfname"]
-      @creatorlname    = info["creatorlname"]
-      @description     = info["description"]
-      @expirationdate  = info["expirationdate"]
-      @filecount       = info["filecount"]
-      @progenyeditdate = info["progenyeditdate"]
-      @streamid        = info["streamid"]
-      @commentcount    = info["commentcount"]
-      @isfavorite      = info["isfavorite"]
-      @ispinned        = info["ispinned"]
-      @ispersonal      = info["ispersonal"]
+    if item == nil
+      item = getex #get attributes from item to avoid an extra API call
+    end
+    @parentid        = item["parentid"]
+    @parentname      = item["parentname"]
+    @grandparentid   = item["grandparentid"]
+    @type            = item["type"]
+    @displayname     = item["displayname"]
+    @size            = item["size"]
+    @creatorname     = item["creatorname"]
+    @zoneid          = item["zoneid"]
+    @canupload       = item["canupload"]
+    @candownload     = item["candownload"]
+    @candelete       = item["candelete"]
+    @creationdate    = item["creationdate"]
+    @filename        = item["filename"]
+    @details         = item["details"]
+    @creatorid       = item["creatorid"]
+    @creatorfname    = item["creatorfname"]
+    @creatorlname    = item["creatorlname"]
+    @description     = item["description"]
+    @expirationdate  = item["expirationdate"]
+    @filecount       = item["filecount"]
+    @progenyeditdate = item["progenyeditdate"]
+    @streamid        = item["streamid"]
+    @commentcount    = item["commentcount"]
+    @isfavorite      = item["isfavorite"]
+    @ispinned        = item["ispinned"]
+    @ispersonal      = item["ispersonal"]
+    
+    if @type and @type != "account"
+        @parent = ShareFolder.new(@parentid, @authid, @subdomain)
     end
     
-    fetch_children if include_children
-  end
+    if @parent and @parent.type != "account"
+      @grandparent = ShareFolder.new(@grandparentid, @authid, @subdomain)
+    end
 
-  # Returns id of the current folder verifying it exists
-  def get
-    url = prefix + "get"
-    return response(url)
-  end       
-
-  # Returns all metadata of the requested folder id
-  def getex
-    url = prefix + "getex"
-    return response(url)
+    fetch_children     if include_children
   end
 
   # Passing the required "name" parameter creates a folder with this name. Optionally, passing an "overwrite" parameter as true/false, will overwrite an existing folder if true.
   def create(name)
     url = prefix + "create" + "&name=#{name}"
-    return response(url)
-  end
-
-  # Returns a list of all sub-folders and files in the current folder
-  def list
-    url = prefix + "list"
     return response(url)
   end
 
@@ -167,12 +134,6 @@ class ShareFolder
   def revoke(userid=nil, email=nil) #(userid OR email) required
   end
 
-  # Returns a list of all sub-folders and files in the current folder with additional information.
-  def listex
-    url = prefix + "listex"
-    return response(url)
-  end
-
   # Returns a permission list for the given folder.
   def getacl
     url = prefix + "getacl"
@@ -191,17 +152,7 @@ class ShareFolder
     end
   end
 
-  # Returns a ShareFolder object that is the parent of self
-  def parent
-    return ShareFolder.new(@parentid, @authid, @subdomain)
-  end
-
-  # Returns a ShareFolder object that is the grandparent of self
-  def grandparent
-    return ShareFolder.new(@grandparentid, @authid, @subdomain)
-  end
-
-private
+protected
 
   def prefix
     "https://#{@subdomain}.sharefile.com/rest/folder.aspx?fmt=json&authid=#{@authid}&id=#{@id}&op="
@@ -215,6 +166,31 @@ private
       return r
     end
   end
+
+  # Returns a list of all sub-folders and files in the current folder with additional information.
+  def listex
+    url = prefix + "listex"
+    return response(url)
+  end
+
+    # Returns a list of all sub-folders and files in the current folder
+  def list
+    url = prefix + "list"
+    return response(url)
+  end
+
+  # Returns id of the current folder verifying it exists
+  def get
+    url = prefix + "get"
+    return response(url)
+  end    
+
+  # Returns all metadata of the requested folder id
+  def getex
+    url = prefix + "getex"
+    return response(url)
+  end
+
 end #ShareFolder
  
 class ShareFile
@@ -230,8 +206,11 @@ class ShareFile
                 :description,
                 :descriptionhtml,
                 :expirationdate,
+
                 :parentid,
                 :parentname,
+                :parent,
+
                 :url,
                 :previewstatus,
                 :virusstatus,
@@ -247,58 +226,33 @@ class ShareFile
     @authid = authid
     @subdomain = subdomain
 
-    if item #get attributes from item to avoid an extra API call
-      @type             = item["type"]
-      @filename         = item["filename"]
-      @displayname      = item["displayname"]
-      @size             = item["size"]
-      @creationdate     = item["creationdate"]
-      @creatorfname     = item["creatorfname"]
-      @creatorlname     = item["creatorlname"]
-      @description      = item["description"]
-      @descriptionhtml  = item["descriptionhtml"]
-      @expirationdate   = item["expirationdate"]
-      @parentid         = item["parentid"]
-      @parentname       = item["parentname"]
-      @url              = item["url"]
-      @previewstatus    = item["previewstatus"]
-      @virusstatus      = item["virusstatus"]
-      @md5              = item["md5"]
-      @thumb75          = item["thumb75"]
-      @thumb600         = item["thumb600"]
-      @creatorid        = item["creatorid"]
-      @streamid         = item["streamid"]
-      @zoneid           = item["zoneid"]
-    else #get attributes from getex
-      info = self.getex
-      @type             = info["type"]
-      @filename         = info["filename"]
-      @displayname      = info["displayname"]
-      @size             = info["size"]
-      @creationdate     = info["creationdate"]
-      @creatorfname     = info["creatorfname"]
-      @creatorlname     = info["creatorlname"]
-      @description      = info["description"]
-      @descriptionhtml  = info["descriptionhtml"]
-      @expirationdate   = info["expirationdate"]
-      @parentid         = info["parentid"]
-      @parentname       = info["parentname"]
-      @url              = info["url"]
-      @previewstatus    = info["previewstatus"]
-      @virusstatus      = info["virusstatus"]
-      @md5              = info["md5"]
-      @thumb75          = info["thumb75"]
-      @thumb600         = info["thumb600"]
-      @creatorid        = info["creatorid"]
-      @streamid         = info["streamid"]
-      @zoneid           = info["zoneid"]
+    if item == nil
+      item = getex  #get attributes from item to avoid an extra API call
     end
-  end
+    @type             = item["type"]
+    @filename         = item["filename"]
+    @displayname      = item["displayname"]
+    @size             = item["size"]
+    @creationdate     = item["creationdate"]
+    @creatorfname     = item["creatorfname"]
+    @creatorlname     = item["creatorlname"]
+    @description      = item["description"]
+    @descriptionhtml  = item["descriptionhtml"]
+    @expirationdate   = item["expirationdate"]
+    @parentid         = item["parentid"]
+    @parentname       = item["parentname"]
+    @url              = item["url"]
+    @previewstatus    = item["previewstatus"]
+    @virusstatus      = item["virusstatus"]
+    @md5              = item["md5"]
+    @thumb75          = item["thumb75"]
+    @thumb600         = item["thumb600"]
+    @creatorid        = item["creatorid"]
+    @streamid         = item["streamid"]
+    @zoneid           = item["zoneid"]
 
-  # Returns all metadata of the requested file id.
-  def get
-    url = prefix + "get"
-    return response(url)
+    @parent = ShareFolder.new(@parentid, @authid, @subdomain)
+    @grandparent = @parent.parent
   end
 
   # (not implemented) Generates a public link for download.
@@ -327,23 +281,19 @@ class ShareFile
     return response(url)
   end
 
+protected
+  
+  # Returns all metadata of the requested file id.
+  def get
+    url = prefix + "get"
+    return response(url)
+  end
+
   # Returns additional data for the requested file.
   def getex
     url = prefix + "getex"
     return response(url)
   end
-
-  # Returns a ShareFolder object that is the parent of self
-  def parent
-    return ShareFolder.new(@parentid, @authid, @subdomain)
-  end
-
-  # Returns a ShareFolder object that is the grandparent of self
-  def grandparent
-    return ShareFolder.new(@grandparentid, @authid, @subdomain)
-  end
-
-private
 
   def prefix
     "https://#{@subdomain}.sharefile.com/rest/file.aspx?fmt=json&authid=#{@authid}&id=#{@id}&op="
@@ -363,41 +313,81 @@ end #ShareFile
 
 class ShareUser
   attr_accessor :authid, :subdomain, :id, 
-                :firstname, 
-                :lastname, 
-                :email, 
-                :isemployee,
+                :firstname,
+                :lastname,
+                :name,
+                :shortname,
+                :accountid,
+                :virtualroot,
+                :primaryemail,
                 :company,
-                :createfolders,
-                :usefilebox,
-                :manageusers,
-                :isadmin,
-                :password
+                :accountemployee,
+                :accountadmin,
+                :canresetpassword,
+                :dateformat,
+                :requiredownloadlogin,
+                :canviewmysettings,
+                :zoneid,
+                :cancreaterootfolders,
+                :timezoneoffset,
+                :timeformat,
+                :longtimeformat,
+                :enableclientsend,
+                :canusefilebox,
+                :requirecompanyinfo,
+                :adminsso,
+                :lastanylogindt,
+                :lastweblogindt,
+                :canselectfolderzone,
+                :poisonpillinterval,
+                :canopenexternal,
+                :cancachefiles,
+                :cancachecredentials,
+                :isdisabled
 
-  def initialize(id, authid, subdomain)
+
+
+
+  def initialize(id, authid, subdomain, item=nil)
     @id = id
     @authid = authid
     @subdomain = subdomain
 
-    #TODO full init
-  end
+    if item == nil
+      item = getex # get attributes from item to avoid extra API call
+    end
 
-  # Returns the user metadata.
-  def get
-    url = prefix + "get" + id_param
-    return response(url)
-  end
-
-  # Returns a list of all the account employees.
-  def liste
-    url = prefix + "liste"
-    return response(url)
-  end
-
-  # Returns a list of all the account clients.
-  def listc
-    url = prefix + "listc"
-    return response(url)
+    @firstname = item["firstname"]
+    @lastname = item["lastname"]
+    @name = item["name"]
+    @shortname = item["shortname"]
+    @accountid = item["accountid"]
+    @virtualroot = item["virtualroot"]
+    @primaryemail = item["primaryemail"]
+    @company = item["company"]
+    @accountemployee = item["accountemployee"]
+    @accountadmin = item["accountadmin"]
+    @canresetpassword = item["canresetpassword"]
+    @dateformat = item["dateformat"]
+    @requiredownloadlogin = item["requiredownloadlogin"]
+    @canviewmysettings = item["canviewmysettings"]
+    @zoneid = item["zoneid"]
+    @cancreaterootfolders = item["cancreaterootfolders"]
+    @timezoneoffset = item["timezoneoffset"]
+    @timeformat = item["timeformat"]
+    @longtimeformat = item["longtimeformat"]
+    @enableclientsend = item["enableclientsend"]
+    @canusefilebox = item["canusefilebox"]
+    @requirecompanyinfo = item["requirecompanyinfo"]
+    @adminsso = item["adminsso"]
+    @lastanylogindt = item["lastanylogindt"]
+    @lastweblogindt = item["lastweblogindt"]
+    @canselectfolderzone = item["canselectfolderzone"]
+    @poisonpillinterval = item["poisonpillinterval"]
+    @canopenexternal = item["canopenexternal"]
+    @cancachefiles = item["cancachefiles"]
+    @cancachecredentials = item["cancachecredentials"]
+    @isdisabled = item["isdisabled"]
   end
 
   # Calling this will delete the user completely from the system. Note: This operation may take several minutes depending on the number of associated folders the user is assigned to.
@@ -412,8 +402,22 @@ class ShareUser
     return response(url)
   end
 
-  # (not implemented) Passing in the required parameters, a user is created in the system as either a client or an employee of the account.
-  def create(firstname, lastname, email, isemployee=false, company=nil, createfolders=false, usefilebox=false, manageusers=false, isadmin=false, password=nil)    
+  # Passing in the required parameters, a user is created in the system as either a client or an employee of the account.
+  def ShareUser.create(subdomain, authid, firstname, lastname, email, isemployee=false, options={"company"=>nil, "createfolders"=>false, "usefilebox"=>false, "manageusers"=>false, "isadmin"=>false, "password"=>nil})
+    prefix = "https://#{subdomain}.sharefile.com/rest/users.aspx?fmt=json&authid=#{authid}&op="
+
+    option_params = ""
+    options.each do |k,v|
+      option_params += "&#{k}=#{v}"
+    end
+    url = prefix + "create&firstname=#{firstname}&lastname=#{lastname}&email=#{email}&isemployee=#{isemployee}" + option_params
+    r = JSON.parse(open(url).read)
+    if r["error"] == false
+      return ShareUser.new(r["value"]["id"], authid, subdomain, r["value"])
+    else
+      print "create failed: #{r}"
+      return r
+    end
   end
 
   # (not implemented) Passing in the required parameters, a user is updated in the system. Other specific updates must be made to separate operators.
@@ -424,13 +428,18 @@ class ShareUser
   def resetp(oldp,newp,notify=false)
   end
 
+
+  # Returns the user metadata.
+  def get
+    url = prefix + "get" + id_param
+    return response(url)
+  end
+
   # Returns additional information about the user.
   def getex
     url = prefix + "getex" + id_param
     return response(url)
   end
-
-private
 
   def response(url)
     r = JSON.parse(open(url).read)
@@ -444,6 +453,10 @@ private
   def prefix
     "https://#{@subdomain}.sharefile.com/rest/users.aspx?fmt=json&authid=#{@authid}&op="
   end
+  
+  def ShareUser.prefix
+    "https://#{@subdomain}.sharefile.com/rest/users.aspx?fmt=json&authid=#{@authid}&op="
+  end
 
   def id_param
     "&id=#{@id}"
@@ -452,19 +465,6 @@ private
 end #ShareUser
 
 
-=begin rdoc
- This is how you make the initial connection to sharefile API.
-
- +connection+ = +ShareFileService+.+new+("_yoursubdomain_", "_youremail_", "_yourpassword_")
- 
- +root+ = +connection+.+root_folder+ => ShareFolder object that is the root of your sharefile account
- 
- +root+.+fetch_children+ -- call explicitly to avoid unneeded API calls
- 
- +root+.+children+ => list of ShareFolder and ShareFile objects in the root. Populated by +fetch_children+, otherwise empty list.
- 
- +connection+.+search+("_superimportantfile.txt_") => list of ShareFolder and ShareFile objects matching your search from sharefile.
-=end
 class ShareFileService
  
   attr_accessor :root_folder, :subdomain, :email, :password, :authid, :current_folder_id, :root_id
@@ -474,7 +474,13 @@ class ShareFileService
     @email = email
     @password = password
     auth_url = "https://#{@subdomain}.sharefile.com/rest/getAuthID.aspx?username=#{@email}&password=#{@password}&fmt=json"
-    @authid = JSON.parse(open(auth_url).read)["value"]
+    response = JSON.parse(open(auth_url).read)
+    if response["error"] == false
+      @authid = response["value"]
+    else
+      print "auth error: #{response}"
+      return
+    end
     root_id_url = "https://#{@subdomain}.sharefile.com/rest/folder.aspx?op=get&authid=#{@authid}&path=/&fmt=json"
     @root_id = JSON.parse(open(root_id_url).read)["value"]
     @root_folder = ShareFolder.new(@root_id, @authid, @subdomain)
@@ -499,5 +505,46 @@ class ShareFileService
     end
   end
  
+  # Returns a list of all the account employees.
+  def employees
+    emps = []
+    url = prefix + "liste"
+    users = response(url)
+    if users.class == Array #success
+      users.each do |u|
+        emps << ShareUser.new(u["id"], @authid, @subdomain)
+      end
+      return emps
+    else #failed
+      return users
+    end
+  end
+
+  # Returns a list of all the account clients.
+  def clients
+    clis = []
+    url = prefix + "listc"
+    users = response(url)
+    if users.class == Array #success
+      users.each do |u|
+        clis << ShareUser.new(u["id"], @authid, @subdomain, u)
+      end
+      return clis
+    else #failed
+      return users
+    end
+  end
+
+  def prefix
+    "https://#{@subdomain}.sharefile.com/rest/users.aspx?fmt=json&authid=#{@authid}&op="
+  end
+
+  def response(url)
+    r = JSON.parse(open(url).read)
+    if r["error"] == false
+      return r["value"]
+    else
+      return r
+    end
+  end
 end #ShareFileService
- 
