@@ -40,9 +40,7 @@ results = myaccount.search("superimportantfile.txt")
 
 ````
 results.each do |r|
-	if r.type == "file"
-		r.download(local_path)
-	end
+	r.download(local_path) if r.type == "file"
 end
 ````
 Give it a local path or look for the downloads in your local user folder (wherever ruby wants to put it)
