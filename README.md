@@ -14,12 +14,29 @@ require 'sharefile-ruby'
 myaccount = ShareFileService.new("yoursubdomain", "youremail", "yourpassword")
 ````
 
-### Where am I?
- 
+# Folders
+
 ````
 root = myaccount.root_folder
 ````
 `root` is now a `ShareFolder` object that is the root of your sharefile account
+
+````
+new_folder = root.create("New Folder")
+````
+````
+new_folder.delete
+````
+
+
+# Files
+
+# Users
+
+
+### Where am I?
+ 
+
 
 ### What do we have here?
 
