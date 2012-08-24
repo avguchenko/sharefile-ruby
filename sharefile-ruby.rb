@@ -60,9 +60,8 @@ class ShareFolder
     @subdomain = subdomain
     @children = []
 
-    if item == nil
-      item = getex #get attributes from item to avoid an extra API call
-    end
+    item = getex if item == nil #get attributes from item to avoid an extra API call
+
     @parentid        = item["parentid"]
     @parentname      = item["parentname"]
     @grandparentid   = item["grandparentid"]
@@ -355,9 +354,7 @@ class ShareUser
     @authid = authid
     @subdomain = subdomain
 
-    if item == nil
-      item = getex # get attributes from item to avoid extra API call
-    end
+    item = getex if item == nil # get attributes from item to avoid extra API call
 
     @firstname = item["firstname"]
     @lastname = item["lastname"]
